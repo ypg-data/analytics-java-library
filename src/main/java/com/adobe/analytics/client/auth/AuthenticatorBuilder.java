@@ -2,6 +2,9 @@ package com.adobe.analytics.client.auth;
 
 import java.net.Proxy;
 
+import com.adobe.analytics.client.auth.oauth.ClientCredentials;
+import com.adobe.analytics.client.auth.oauth.JwtBearer;
+
 public class AuthenticatorBuilder {
 
 	public enum AuthType {
@@ -31,7 +34,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setClientId(String clientId) {
-		if (type == null) {
+		if (clientId == null) {
 			throw new NullPointerException("ClientId can't be null");
 		}
 		this.clientId = clientId;
@@ -39,7 +42,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setUsername(String username) {
-		if (type == null) {
+		if (username == null) {
 			throw new NullPointerException("Username can't be null");
 		}
 		this.username = username;
@@ -47,7 +50,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setSecret(String secret) {
-		if (type == null) {
+		if (secret == null) {
 			throw new NullPointerException("Secret can't be null");
 		}
 		this.secret = secret;
@@ -55,7 +58,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setPrivateKey(byte[] privateKey) {
-		if (type == null) {
+		if (privateKey == null) {
 			throw new NullPointerException("Private key can't be null");
 		}
 		this.privateKey = privateKey;
@@ -63,7 +66,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setEndpoint(String endpoint) {
-		if (type == null) {
+		if (endpoint == null) {
 			throw new NullPointerException("Endpoint can't be null");
 		}
 		this.endpoint = endpoint;
@@ -71,7 +74,7 @@ public class AuthenticatorBuilder {
 	}
 
 	public AuthenticatorBuilder setProxy(Proxy proxy) {
-		if (type == null) {
+		if (proxy == null) {
 			throw new NullPointerException("Proxy can't be null");
 		}
 		this.proxy = proxy;
@@ -80,14 +83,14 @@ public class AuthenticatorBuilder {
 
 	public ClientAuthenticator build() {
 		switch (type) {
-			case CREDENTIALS_OAUTH:
-				return new ClientCredentialsOAuthenticator(clientId, secret, endpoint, proxy);
+		case CREDENTIALS_OAUTH:
+			return new OAuthenticator(new ClientCredentials(clientId, secret), endpoint, proxy);
 
-			case JWTO_OAUTH:
-				return new JWTOAuthenticator(privateKey, clientId, username, endpoint, proxy);
+		case JWTO_OAUTH:
+			return new OAuthenticator(new JwtBearer(privateKey, clientId, username, endpoint), endpoint, proxy);
 
-			case WSSE:
-				return new WsseAuthenticator(username, secret);
+		case WSSE:
+			return new WsseAuthenticator(username, secret);
 		}
 		throw new IllegalStateException("Authentication type hasn't been chosen: " + type);
 	}
